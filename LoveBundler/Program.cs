@@ -7,6 +7,7 @@ using System;
 var commandSelector = args[0];
 try
 {
+    await Resources.Download();
     switch (commandSelector)
     {
         case "convert":
@@ -21,9 +22,24 @@ try
             command.Execute();
             break;
         }
+        case "-h":
+        case "--help":
+            throw new ArgumentException("print help text");
         default:
             throw new ArgumentException("Invalid command");
     }
+}
+catch (ArgumentException e)
+{
+    // Print help text
+    Console.WriteLine("Usage: lovebundler <command> [options]");
+    Console.WriteLine("Commands:");
+    Console.WriteLine("  convert <files>  Convert media files to the required format");
+    Console.WriteLine("  bundle <dir>     Bundle the game for the specified console");
+    Console.WriteLine();
+    Console.WriteLine("Options:");
+    Console.WriteLine("  -h, --help       Show this help text");
+    Console.WriteLine();
 }
 catch (Exception e)
 {
