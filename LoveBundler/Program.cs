@@ -32,7 +32,7 @@ try
 catch (ArgumentException e)
 {
     // Print help text
-    Console.WriteLine("Usage: lovebundler <command> [options]");
+    Console.WriteLine("Usage: lovebundler <command>");
     Console.WriteLine("Commands:");
     Console.WriteLine("  convert <files>  Convert media files to the required format");
     Console.WriteLine("  bundle <dir>     Bundle the game for the specified console");

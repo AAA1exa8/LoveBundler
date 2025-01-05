@@ -16,7 +16,7 @@ If you already have pacman installed you can customize [existing pacman installa
 ## Usage
 
 ```
-lovebundler <command> [options]
+lovebundler <command>
 Commands:
   convert <files>  Convert media files to the required format
   bundle <dir>     Bundle the game for the specified console
