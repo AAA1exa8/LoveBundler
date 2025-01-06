@@ -128,8 +128,9 @@ public class BundlerCompileCommand
             {
                 customIcon = Path.Combine(this.directory, customIcon);
                 CheckIcon(new FileInfo(customIcon), target);
-                iconPath = Path.GetFullPath(customIcon);
+                iconPath = customIcon;
             }
+
 
             if (!Compile(gameDirectory, target, settings, iconPath))
                 Console.WriteLine($"Failed to compile {target}");
@@ -137,4 +138,14 @@ public class BundlerCompileCommand
                 Console.WriteLine($"Successfully compiled {target}");
         }
     }
+
+    private void Bundle()
+    {
+    }
+
+    private void BundleLoose()
+    {
+        
+    }
+
 }
