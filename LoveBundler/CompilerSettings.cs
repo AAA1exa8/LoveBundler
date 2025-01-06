@@ -22,10 +22,12 @@ public class CompilerSettings
         this.Description = (string)((TomlTable)model["metadata"])["description"];
         this.Version = (string)((TomlTable)model["metadata"])["version"];
         this.Target = ((TomlArray)((TomlTable)model["build"]!)["targets"]).Select(x => (string)x).ToArray();
-        var tmpIcons = ((TomlTable)model["icons"]).ToDictionary();
+        var tmpIcons = ((TomlTable)((TomlTable)model["metadata"])["icons"]).ToDictionary();
         this.Icons = new Dictionary<string, string>();
         foreach (var (key, value) in tmpIcons)
         {
+            if (string.IsNullOrEmpty(value as string))
+                continue;
             this.Icons.Add(key, (string)value);
         }
     }

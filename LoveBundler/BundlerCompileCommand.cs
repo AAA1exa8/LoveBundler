@@ -104,7 +104,10 @@ public class BundlerCompileCommand
 
     private void Compile()
     {
-        var settings = new CompilerSettings(Path.Combine(this.directory, "lovebrew.toml"));
+        var tomlPath = Path.Combine(this.directory, "lovebrew.toml");
+        if (!Path.Exists(tomlPath)) throw new Exception("No lovebrew.toml found in the specified directory");
+        var tomlContents = File.ReadAllText(tomlPath);
+        var settings = new CompilerSettings(tomlContents);
         if (settings.Target.Length == 0) throw new Exception("No target specified in lovebrew.toml");
 
         foreach (var target in settings.Target)
