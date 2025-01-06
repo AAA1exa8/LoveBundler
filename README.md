@@ -16,10 +16,17 @@ If you already have pacman installed you can customize [existing pacman installa
 ## Usage
 
 ```
-lovebundler <command>
-Commands:
-  convert <files>  Convert media files to the required format
-  bundle <dir>     Bundle the game for the specified console
+Description:
+  LoveBundler, CLI version of bundler for LovePotion
+
+Usage:
+  LoveBundler [command] [options]
+
 Options:
-  -h, --help       Show this help text
+  --version       Show version information
+  -?, -h, --help  Show help and usage information
+
+Commands:
+  convert <files>  Convert media files to format usable on console
+  bundle <dir>     Bundle the game for the specified console
 ```
