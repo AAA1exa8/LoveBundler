@@ -4,6 +4,20 @@ using LoveBundler;
 using System.Linq;
 using System;
 
+if (args.Length == 0)
+{
+    // Print help text if no argument is specified
+    Console.WriteLine("Usage: lovebundler <command>");
+    Console.WriteLine("Commands:");
+    Console.WriteLine("  convert <files>  Convert media files to the required format");
+    Console.WriteLine("  bundle <dir>     Bundle the game for the specified console");
+    Console.WriteLine();
+    Console.WriteLine("Options:");
+    Console.WriteLine("  -h, --help       Show this help text");
+    Console.WriteLine();
+    return;
+}
+
 var commandSelector = args[0];
 try
 {
