@@ -16,7 +16,7 @@ sudo (dkp-)pacman -S wut-tools
 ### CLI aproach (traditional method)
 To get devKitPro's pacman repositories refer to the [devkitPro wiki](https://devkitpro.org/wiki/Getting_Started).
 
-Then after installing the devKirPro repositories run these commands on MSYS2:
+Then after installing the devKitPro repositories run these commands on MSYS2:
 ```bash
 sudo (dkp-)pacman -Syu && sudo (dkp-)pacman -S switch-dev 3ds-dev wiiu-dev wut-tools
 ```
