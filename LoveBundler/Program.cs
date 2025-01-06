@@ -17,8 +17,9 @@ convertCommand.SetHandler(async (files) =>
 var bundleCommand = new Command("bundle", "Bundle the game for the specified console");
 var dirArgument = new Argument<string>("dir", "Directory to bundle");
 bundleCommand.Add(dirArgument);
-bundleCommand.SetHandler((dir) =>
+bundleCommand.SetHandler(async (dir) =>
 {
+    await Resources.Download();
     var command = new BundlerCompileCommand(dir);
     command.Execute();
 }, dirArgument);
