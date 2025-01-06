@@ -11,8 +11,10 @@ public class CompilerSettings
     public string Author { get; set; }
     public string Description { get; set; }
     public string Version { get; set; }
-    public string[] Target { get; set; }
     public Dictionary<string, string> Icons { get; set; }
+    public string[] Target { get; set; }
+    public string Source { get; set; }
+    public bool Packaged { get; set; }
 
     public CompilerSettings(string toml)
     {
@@ -22,6 +24,7 @@ public class CompilerSettings
         this.Description = (string)((TomlTable)model["metadata"])["description"];
         this.Version = (string)((TomlTable)model["metadata"])["version"];
         this.Target = ((TomlArray)((TomlTable)model["build"]!)["targets"]).Select(x => (string)x).ToArray();
+        this.Source = (string)((TomlTable)model["build"])["source"];
         var tmpIcons = ((TomlTable)((TomlTable)model["metadata"])["icons"]).ToDictionary();
         this.Icons = new Dictionary<string, string>();
         foreach (var (key, value) in tmpIcons)

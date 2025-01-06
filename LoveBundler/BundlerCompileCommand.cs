@@ -1,3 +1,5 @@
+using System.IO.Compression;
+
 namespace LoveBundler;
 
 using System.Diagnostics;
@@ -10,9 +12,9 @@ public class BundlerCompileCommand
         this.directory = directory;
     }
 
-    public void Execute()
+    public async Task Execute()
     {
-        Compile();
+        await BuildBundle();
     }
 
     private string directory { get; set; }
@@ -38,7 +40,7 @@ public class BundlerCompileCommand
         return false;
     }
 
-    private bool Compile(string directory, string console, CompilerSettings settings, string iconPath)
+    private async Task<bool> Compile(string directory, string console, CompilerSettings settings, string iconPath)
     {
         var path = Path.Join(directory, settings.Title);
         var data = Resources.Data[console];
@@ -61,7 +63,35 @@ public class BundlerCompileCommand
             _ => throw new NotImplementedException()
         };
 
-        return RunProcess(info, $"{path}.{extension}");
+        if (!RunProcess(info, $"{path}.{extension}")) return false;
+
+        // Merge binaries with game assets
+        var binaryPath = Path.Combine(directory, $"{settings.Title}.{extension}");
+        var assetPath = Path.Combine(this.directory, settings.Source);
+
+        using (var zip = new ZipArchive(File.Create(Path.Combine(directory, $"{settings.Title}-bundle.zip")),
+                   ZipArchiveMode.Create))
+        {
+            // Add game assets to the zip
+            foreach (var file in Directory.GetFiles(assetPath, "*", SearchOption.AllDirectories))
+            {
+                var entryName = Path.GetRelativePath(assetPath, file);
+                zip.CreateEntryFromFile(file, entryName);
+            }
+        }
+
+        // Merge binary and game assets into a single file
+        var binaryData = await File.ReadAllBytesAsync(binaryPath);
+        var gameData = await File.ReadAllBytesAsync(Path.Combine(directory, $"{settings.Title}-bundle.zip"));
+
+        var mergedData = new byte[binaryData.Length + gameData.Length];
+        Buffer.BlockCopy(binaryData, 0, mergedData, 0, binaryData.Length);
+        Buffer.BlockCopy(gameData, 0, mergedData, binaryData.Length, gameData.Length);
+
+        var mergedFilePath = Path.Combine(directory, $"{settings.Title}-merged.{extension}");
+        await File.WriteAllBytesAsync(mergedFilePath, mergedData);
+
+        return true;
     }
 
     private static bool ValidateIcon(string console, string extension)
@@ -102,7 +132,7 @@ public class BundlerCompileCommand
         }
     }
 
-    private void Compile()
+    private async Task BuildBundle()
     {
         var tomlPath = Path.Combine(this.directory, "lovebrew.toml");
         if (!Path.Exists(tomlPath)) throw new Exception("No lovebrew.toml found in the specified directory");
@@ -118,8 +148,8 @@ public class BundlerCompileCommand
                 continue;
             }
 
-            string gameDirectory = Path.Combine(this.directory, target);
-            Directory.CreateDirectory(gameDirectory);
+            string outputDirecotry = Path.Combine(this.directory, target);
+            Directory.CreateDirectory(outputDirecotry);
             Console.WriteLine($"Creating {target} for {target}");
 
             var iconPath = Path.GetFullPath(data.Icon);
@@ -128,10 +158,11 @@ public class BundlerCompileCommand
             {
                 customIcon = Path.Combine(this.directory, customIcon);
                 CheckIcon(new FileInfo(customIcon), target);
-                iconPath = Path.GetFullPath(customIcon);
+                iconPath = customIcon;
             }
 
-            if (!Compile(gameDirectory, target, settings, iconPath))
+
+            if (!(await Compile(outputDirecotry, target, settings, iconPath)))
                 Console.WriteLine($"Failed to compile {target}");
             else
                 Console.WriteLine($"Successfully compiled {target}");

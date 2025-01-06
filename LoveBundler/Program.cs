@@ -21,7 +21,7 @@ bundleCommand.SetHandler(async (dir) =>
 {
     await Resources.Download();
     var command = new BundlerCompileCommand(dir);
-    command.Execute();
+    await command.Execute();
 }, dirArgument);
 
 rootCommand.Add(convertCommand);
