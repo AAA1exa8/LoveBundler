@@ -98,7 +98,7 @@ public class BundlerCompileCommand
             if (exception is ImageFormatException)
                 message = $"Invalid icon format for {target}.";
 
-            throw new Exception(message);
+            throw exception;
         }
     }
 
@@ -126,6 +126,7 @@ public class BundlerCompileCommand
             var isCustomIcon = settings.Icons.TryGetValue(target, out var customIcon);
             if (isCustomIcon)
             {
+                customIcon = Path.Combine(this.directory, customIcon);
                 CheckIcon(new FileInfo(customIcon), target);
                 iconPath = Path.GetFullPath(customIcon);
             }
