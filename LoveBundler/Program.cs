@@ -32,9 +32,16 @@ try
         }
         case "bundle":
         {
-            var command = new BundlerCompileCommand(args[1]);
-            command.Execute();
-            break;
+            if (args.Length < 2 || string.IsNullOrWhiteSpace(args[1]))
+            {
+                Console.WriteLine("Error: Missing directory argument for the 'bundle' command.");
+                Console.WriteLine("Usage: lovebundler bundle <dir>");
+                return;
+            }
+
+             var command = new BundlerCompileCommand(args[1]);
+             command.Execute();
+             break;
         }
         case "-h":
         case "--help":
