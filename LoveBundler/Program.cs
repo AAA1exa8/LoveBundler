@@ -6,7 +6,7 @@ using System.CommandLine;
 var rootCommand = new RootCommand("LoveBundler, CLI version of bundler for LovePotion");
 
 var convertCommand = new Command("convert", "Convert media files to format usable on console");
-var filesOption = new Argument<string[]?>("files", "Files to convert");
+var filesOption = new Option<string[]?>("--files", "Files to convert");
 var dirOption = new Option<string?>("--dir", "Convert all media files in directory");
 
 convertCommand.Add(filesOption);
