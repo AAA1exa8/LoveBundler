@@ -85,12 +85,12 @@ public static class BundlerMediaConvertor
         return new ProcessStartInfo("tex3ds", $"-f rgba8888 -z auto \"{source}\" -o \"{destination}\"");
     }
 
-    private static async Task<bool> ConvertMediaFile(FileInfo file, bool isFont)
+    private static async Task<(bool, string)> ConvertMediaFile(FileInfo file, bool isFont)
     {
         var directory = file.DirectoryName;
 
         if (!IsValidMediaFile(file.FullName, isFont))
-            return false;
+            Console.Write($"Skipping {file.Name}..");
 
         var info = CreateConvertCommand(file.FullName, isFont);
 
@@ -105,7 +105,7 @@ public static class BundlerMediaConvertor
         if (!process.Start())
         {
             Console.WriteLine($"Failed to start process {info.FileName}");
-            return false;
+            return (false, file.Name);
         }
 
         await process.WaitForExitAsync();
@@ -113,11 +113,11 @@ public static class BundlerMediaConvertor
         if (!Path.Exists(convertedPath))
         {
             Console.WriteLine($"Failed to convert {file.Name} to {convertedFilename}");
-            return false;
+            return (false, file.Name);
         }
 
         Console.WriteLine($"Converted {file.Name} to {convertedFilename} successfully.");
-        return true;
+        return (true, file.Name);
     }
 
     public static async Task ConvertMediaFiles(string[] files)
@@ -128,7 +128,7 @@ public static class BundlerMediaConvertor
             return;
         }
 
-        List<Task<bool>> tasks = new();
+        List<Task<(bool, string)>> tasks = new();
         foreach (var fileName in files)
         {
             var file = new FileInfo(fileName);
@@ -160,9 +160,9 @@ public static class BundlerMediaConvertor
         foreach (var task in tasks)
         {
             var result = await task;
-            if (!result)
+            if (!result.Item1)
             {
-                Console.WriteLine("Something went wrong.");
+                Console.WriteLine($"Something went wrong while converting {result.Item2}");
             }
         }
     }
