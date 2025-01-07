@@ -4,26 +4,15 @@ using System.Diagnostics;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 
-public class BundlerConvertorCommand
+public static class BundlerMediaConvertor
 {
-    public BundlerConvertorCommand(string[] files)
-    {
-        Files = files;
-    }
-
-    public Task Execute()
-    {
-        return ConvertMediaFiles(Files);
-    }
-
-    private string[] Files { get; set; }
-
     private static readonly List<string> ImageExtensions = new() { ".png", ".jpg", ".jpeg" };
     private static readonly List<string> FontExtensions = new() { ".ttf", ".otf" };
+    private static bool IsFont(string filename) => FontExtensions.Contains(Path.GetExtension(filename).ToLower());
     private const int MaxImageSize = 1024;
     private const int MinImageSize = 3;
 
-    private bool IsValidTexture(string filename)
+    private static bool IsValidTexture(string filename)
     {
         using var image = Image.Load(filename);
 
@@ -59,7 +48,7 @@ public class BundlerConvertorCommand
         return FontDescription.LoadDescription(file) != null;
     }
 
-    private bool IsValidMediaFile(string filepath, bool isFont)
+    private static bool IsValidMediaFile(string filepath, bool isFont)
     {
         var filename = Path.GetFileName(filepath);
 
@@ -96,7 +85,7 @@ public class BundlerConvertorCommand
         return new ProcessStartInfo("tex3ds", $"-f rgba8888 -z auto \"{source}\" -o \"{destination}\"");
     }
 
-    private async Task<bool> ConvertMediaFile(FileInfo file, bool isFont)
+    private static async Task<bool> ConvertMediaFile(FileInfo file, bool isFont)
     {
         var directory = file.DirectoryName;
 
@@ -131,7 +120,7 @@ public class BundlerConvertorCommand
         return true;
     }
 
-    public async Task ConvertMediaFiles(string[] files)
+    public static async Task ConvertMediaFiles(string[] files)
     {
         if (files.Length == 0)
         {
@@ -162,7 +151,7 @@ public class BundlerConvertorCommand
                 continue;
             }
 
-            bool isFont = FontExtensions.Contains(file.Extension.ToLower());
+            bool isFont = IsFont(file.Name);
             tasks.Add(ConvertMediaFile(file, isFont));
         }
 
@@ -174,6 +163,25 @@ public class BundlerConvertorCommand
             if (!result)
             {
                 Console.WriteLine("Something went wrong.");
+            }
+        }
+    }
+
+    public static async Task ConvertFilesInDir(string dir, bool deleteOldFile)
+    {
+        List<string> files = new();
+        foreach (var file in Directory.GetFiles(dir, "*", SearchOption.AllDirectories))
+        {
+            if (ImageExtensions.Contains(Path.GetExtension(file).ToLower()) || FontExtensions.Contains(Path.GetExtension(file).ToLower()))
+                files.Add(file);
+            
+        }
+        await ConvertMediaFiles(files.ToArray());
+        if (deleteOldFile)
+        {
+            foreach (var file in files)
+            {
+                File.Delete(file);
             }
         }
     }
