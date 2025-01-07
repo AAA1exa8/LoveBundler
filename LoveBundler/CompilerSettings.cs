@@ -18,22 +18,69 @@ public class CompilerSettings
 
     public CompilerSettings(string toml)
     {
-        var model = Toml.ToModel(toml);
-        this.Title = (string)((TomlTable)model["metadata"])["title"];
-        this.Author = (string)((TomlTable)model["metadata"])["author"];
-        this.Description = (string)((TomlTable)model["metadata"])["description"];
-        this.Version = (string)((TomlTable)model["metadata"])["version"];
-        this.Target = ((TomlArray)((TomlTable)model["build"]!)["targets"]).Select(x => (string)x).ToArray();
-        this.Source = (string)((TomlTable)model["build"])["source"];
-        var tmpIcons = ((TomlTable)((TomlTable)model["metadata"])["icons"]).ToDictionary();
-        this.Icons = new Dictionary<string, string>();
-        foreach (var (key, value) in tmpIcons)
-        {
-            if (string.IsNullOrEmpty(value as string))
-                continue;
-            this.Icons.Add(key, (string)value);
-        }
-    }
+               var model = Toml.ToModel(toml);
+
+        if (!model.ContainsKey("metadata"))
+            throw new Exception("Missing 'metadata' section in the .toml file.");
+
+         var metadata = (TomlTable)model["metadata"];
+         if (!metadata.ContainsKey("title"))
+             throw new Exception("Missing 'title' in the 'metadata' section of the .toml file.");
+         this.Title = (string)metadata["title"];
+
+         if (!metadata.ContainsKey("author"))
+             throw new Exception("Missing 'author' in the 'metadata' section of the .toml file.");
+         this.Author = (string)metadata["author"];
+
+         if (!metadata.ContainsKey("description"))
+             throw new Exception("Missing 'description' in the 'metadata' section of the .toml file.");
+         this.Description = (string)metadata["description"];
+
+         if (!metadata.ContainsKey("version"))
+             throw new Exception("Missing 'version' in the 'metadata' section of the .toml file.");
+         this.Version = (string)metadata["version"];
+
+         if (!model.ContainsKey("build"))
+             throw new Exception("Missing 'build' section in the .toml file.");
+
+         var build = (TomlTable)model["build"];
+         if (!build.ContainsKey("targets"))
+             throw new Exception("Missing 'targets' in the 'build' section of the .toml file.");
+         this.Target = ((TomlArray)build["targets"]).Select(x => (string)x).ToArray();
+         
+        if (!build.ContainsKey("source"))
+                    throw new Exception("Missing 'source' in the 'build' section of the .toml file.");
+        this.Source = (string)build["source"];
+
+         if (metadata.ContainsKey("icons"))
+         {
+             var tmpIcons = ((TomlTable)metadata["icons"]).ToDictionary();
+             this.Icons = new Dictionary<string, string>();
+             foreach (var (key, value) in tmpIcons)
+             {
+                 if (!string.IsNullOrEmpty(value as string))
+                     this.Icons.Add(key, (string)value);
+             }
+         }
+         else
+         {
+             this.Icons = new Dictionary<string, string>();
+         }
+
+         // Ensure no critical fields are left empty
+         if (string.IsNullOrWhiteSpace(this.Title))
+             throw new Exception("The 'title' field in 'metadata' cannot be empty.");
+         if (string.IsNullOrWhiteSpace(this.Author))
+             throw new Exception("The 'author' field in 'metadata' cannot be empty.");
+         if (string.IsNullOrWhiteSpace(this.Description))
+             throw new Exception("The 'description' field in 'metadata' cannot be empty.");
+         if (string.IsNullOrWhiteSpace(this.Version))
+             throw new Exception("The 'version' field in 'metadata' cannot be empty.");
+         if (this.Target.Length == 0)
+             throw new Exception("The 'targets' array in 'build' must contain at least one target.");
+         if (string.IsNullOrWhiteSpace(this.Source))
+             throw new Exception("The 'source' field in 'build' cannot be empty.");
+     }
 
     /// <summary>
     /// Gets the SMDH command for 3DS compilation
